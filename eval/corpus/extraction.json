@@ -1,0 +1,618 @@
+[
+  {
+    "id": "leap_year_iso_acc1004",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1004", "full_name": "Vivek Joshi"},
+    "input": "my DOB is 1988-02-29",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1988-02-29"}
+    },
+    "notes": "ACC1004 leap-year canary; 1988 IS a leap year so 02-29 is valid"
+  },
+  {
+    "id": "leap_year_spelled_out",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1004", "full_name": "Vivek Joshi"},
+    "input": "born twenty ninth February nineteen eighty eight",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1988-02-29"}
+    },
+    "notes": "spelled-out variant of leap-year canary"
+  },
+  {
+    "id": "leap_year_invalid_year",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"full_name": "John Doe"},
+    "input": "my date of birth is 29-02-1989",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {}
+    },
+    "notes": "1989 is NOT a leap year; deterministic _coerce_date rejects 1989-02-29 even if LLM returns it"
+  },
+  {
+    "id": "dob_ddmm_mmdd_ambiguous_a",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"full_name": "Asha Reddy"},
+    "input": "my DOB is 04-05-1990",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1990-05-04", "dob_alternate": "1990-04-05"}
+    },
+    "notes": "DD-MM=May 4; MM-DD=April 5 — both plausible"
+  },
+  {
+    "id": "dob_ddmm_mmdd_ambiguous_b",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"full_name": "Asha Reddy"},
+    "input": "07/08/1985",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1985-08-07", "dob_alternate": "1985-07-08"}
+    },
+    "notes": "slash separator; DD-MM=Aug 7; MM-DD=July 8"
+  },
+  {
+    "id": "spelled_out_pan",
+    "subset": "critical",
+    "stage": "collecting_card",
+    "slots_in": {},
+    "input": "card number is four five three two zero one five one one two eight three zero three six six",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"pan": "4532015112830366"}
+    },
+    "notes": "16-digit PAN spelled out word-by-word"
+  },
+  {
+    "id": "spelled_out_cvv",
+    "subset": "critical",
+    "stage": "collecting_card",
+    "slots_in": {"pan": "4532015112830366"},
+    "input": "CVV is one two three",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"cvv": "123"}
+    },
+    "notes": "spelled-out 3-digit CVV"
+  },
+  {
+    "id": "nickname_vs_full_name_a",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001"},
+    "input": "you can call me Raja but my full name is Rajarajeswari Balasubramaniam",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"full_name": "Rajarajeswari Balasubramaniam"}
+    },
+    "notes": "verification needs the legal name; nickname is a distractor"
+  },
+  {
+    "id": "nickname_vs_full_name_b",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001"},
+    "input": "everyone calls me Bob but my legal name is Robert Anderson",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"full_name": "Robert Anderson"}
+    },
+    "notes": "shorter variant"
+  },
+  {
+    "id": "polite_refusal_dob",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain"},
+    "input": "I'd rather not share my DOB",
+    "expected": {
+      "intent": "negate",
+      "slots": {}
+    },
+    "notes": "polite refusal must classify NEGATE, not AMBIGUOUS — DECISIONS #10 routes to cancel"
+  },
+  {
+    "id": "polite_refusal_aadhaar",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain"},
+    "input": "I don't want to give you my Aadhaar number",
+    "expected": {
+      "intent": "negate",
+      "slots": {}
+    },
+    "notes": "explicit refusal of specific factor"
+  },
+  {
+    "id": "polite_refusal_generic",
+    "subset": "critical",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain"},
+    "input": "Sorry, I'm not comfortable sharing that",
+    "expected": {
+      "intent": "negate",
+      "slots": {}
+    },
+    "notes": "softer phrasing; still NEGATE not AMBIGUOUS"
+  },
+
+  {
+    "id": "account_id_clean",
+    "subset": "long_tail",
+    "stage": "collecting_account_id",
+    "slots_in": {},
+    "input": "ACC1001",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"account_id": "ACC1001"}
+    }
+  },
+  {
+    "id": "account_id_lowercase",
+    "subset": "long_tail",
+    "stage": "collecting_account_id",
+    "slots_in": {},
+    "input": "my account number is acc1003",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"account_id": "ACC1003"}
+    }
+  },
+  {
+    "id": "account_id_in_sentence",
+    "subset": "long_tail",
+    "stage": "collecting_account_id",
+    "slots_in": {},
+    "input": "the account ID is ACC1002 please",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"account_id": "ACC1002"}
+    }
+  },
+  {
+    "id": "account_id_volunteered_at_greeting",
+    "subset": "long_tail",
+    "stage": "greeting",
+    "slots_in": {},
+    "input": "Hi, my account is ACC1001 and I want to make a payment",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"account_id": "ACC1001"}
+    }
+  },
+  {
+    "id": "out_of_order_three_slots",
+    "subset": "long_tail",
+    "stage": "greeting",
+    "slots_in": {},
+    "input": "ACC1001, name Nithin Jain, DOB 13-04-1990",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {
+        "account_id": "ACC1001",
+        "full_name": "Nithin Jain",
+        "dob": "1990-04-13"
+      }
+    },
+    "notes": "BRIEF #5 out-of-order info; only DD-MM valid (no month 13)"
+  },
+  {
+    "id": "name_only",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001"},
+    "input": "my name is Vivek Joshi",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"full_name": "Vivek Joshi"}
+    }
+  },
+  {
+    "id": "dob_iso_unambiguous",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"full_name": "Asha Reddy"},
+    "input": "1990-05-14",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1990-05-14"}
+    }
+  },
+  {
+    "id": "dob_month_name",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"full_name": "Asha Reddy"},
+    "input": "born May 14, 1990",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1990-05-14"}
+    }
+  },
+  {
+    "id": "dob_ddmm_only_valid_reading",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"full_name": "Asha Reddy"},
+    "input": "13-04-1990",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1990-04-13"}
+    },
+    "notes": "no MM-DD reading possible (month 13); dob_alternate must be null"
+  },
+  {
+    "id": "aadhaar_explicit_factor",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain"},
+    "input": "last 4 digits of my Aadhaar are 1234",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"aadhaar_last4": "1234", "selected_secondary_factor": "aadhaar_last4"}
+    },
+    "notes": "Known long-tail miss as of 2026-05-10: model omits selected_secondary_factor after the polite-refusal prompt fix made it conservative on this slot. Downstream state._selected_or_inferred_factor recovers the factor from aadhaar_last4 value presence, so the orchestrator path is unaffected. Documented in design doc 'where the agent struggles'."
+  },
+  {
+    "id": "aadhaar_4_digits_in_identity_context",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain", "selected_secondary_factor": "aadhaar_last4"},
+    "input": "1234",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"aadhaar_last4": "1234"}
+    },
+    "notes": "factor pre-selected; 4 digits unambiguously map to aadhaar_last4"
+  },
+  {
+    "id": "pincode_clean",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain", "selected_secondary_factor": "pincode"},
+    "input": "560001",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"pincode": "560001"}
+    }
+  },
+  {
+    "id": "pincode_with_space",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain", "selected_secondary_factor": "pincode"},
+    "input": "560 001",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"pincode": "560001"}
+    }
+  },
+  {
+    "id": "factor_choice_aadhaar",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain"},
+    "input": "I'll give you my Aadhaar",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"selected_secondary_factor": "aadhaar_last4"}
+    },
+    "notes": "factor named without value"
+  },
+  {
+    "id": "factor_choice_pincode",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001", "full_name": "Nithin Jain"},
+    "input": "I'd prefer to share my pincode",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"selected_secondary_factor": "pincode"}
+    }
+  },
+  {
+    "id": "amount_with_rupee",
+    "subset": "long_tail",
+    "stage": "collecting_amount",
+    "slots_in": {"verified": true},
+    "input": "₹500",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"amount": "500"}
+    }
+  },
+  {
+    "id": "amount_spelled_out",
+    "subset": "long_tail",
+    "stage": "collecting_amount",
+    "slots_in": {"verified": true},
+    "input": "five hundred rupees",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"amount": "500"}
+    }
+  },
+  {
+    "id": "amount_with_separator_and_decimals",
+    "subset": "long_tail",
+    "stage": "collecting_amount",
+    "slots_in": {"verified": true},
+    "input": "₹1,250.75",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"amount": "1250.75"}
+    }
+  },
+  {
+    "id": "amount_bare_number",
+    "subset": "long_tail",
+    "stage": "collecting_amount",
+    "slots_in": {"verified": true},
+    "input": "500",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"amount": "500"}
+    }
+  },
+  {
+    "id": "card_pan_with_spaces",
+    "subset": "long_tail",
+    "stage": "collecting_card",
+    "slots_in": {},
+    "input": "the card number is 4532 0151 1283 0366",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"pan": "4532015112830366"}
+    }
+  },
+  {
+    "id": "cvv_digit_form",
+    "subset": "long_tail",
+    "stage": "collecting_card",
+    "slots_in": {"pan": "4532015112830366"},
+    "input": "CVV 456",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"cvv": "456"}
+    }
+  },
+  {
+    "id": "expiry_slash_2_digit_year",
+    "subset": "long_tail",
+    "stage": "collecting_card",
+    "slots_in": {"pan": "4532015112830366", "cvv": "123"},
+    "input": "12/27",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"expiry_month": 12, "expiry_year": 2027}
+    }
+  },
+  {
+    "id": "expiry_word_form",
+    "subset": "long_tail",
+    "stage": "collecting_card",
+    "slots_in": {"pan": "4532015112830366", "cvv": "123"},
+    "input": "expires December 2027",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"expiry_month": 12, "expiry_year": 2027}
+    }
+  },
+  {
+    "id": "card_full_silent_default_cardholder",
+    "subset": "long_tail",
+    "stage": "collecting_card",
+    "slots_in": {"full_name": "Nithin Jain"},
+    "input": "card 4532015112830366, CVV 123, expires 12/27",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {
+        "pan": "4532015112830366",
+        "cvv": "123",
+        "expiry_month": 12,
+        "expiry_year": 2027
+      }
+    },
+    "notes": "ANNOTATION RULE #1: name_on_card MUST be null (user did not name a different cardholder)"
+  },
+  {
+    "id": "card_explicit_different_cardholder",
+    "subset": "long_tail",
+    "stage": "collecting_card",
+    "slots_in": {"full_name": "Nithin Jain"},
+    "input": "the card is in my wife's name, Priya Kumar",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"name_on_card": "Priya Kumar"}
+    },
+    "notes": "name_on_card extracted ONLY when explicitly different person"
+  },
+  {
+    "id": "affirm_yes",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"amount": "500", "pan": "4532015112830366", "cvv": "123", "expiry_month": 12, "expiry_year": 2027},
+    "input": "yes",
+    "expected": {
+      "intent": "affirm",
+      "slots": {}
+    }
+  },
+  {
+    "id": "affirm_yeah_go_ahead",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"amount": "500"},
+    "input": "yeah go ahead",
+    "expected": {
+      "intent": "affirm",
+      "slots": {}
+    }
+  },
+  {
+    "id": "affirm_confirmed",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"amount": "500"},
+    "input": "confirmed",
+    "expected": {
+      "intent": "affirm",
+      "slots": {}
+    }
+  },
+  {
+    "id": "affirm_ok_proceed",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"amount": "500"},
+    "input": "ok please proceed",
+    "expected": {
+      "intent": "affirm",
+      "slots": {}
+    }
+  },
+  {
+    "id": "negate_no",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"amount": "500"},
+    "input": "no",
+    "expected": {
+      "intent": "negate",
+      "slots": {}
+    }
+  },
+  {
+    "id": "negate_cancel",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"amount": "500"},
+    "input": "cancel please",
+    "expected": {
+      "intent": "negate",
+      "slots": {}
+    }
+  },
+  {
+    "id": "negate_stop",
+    "subset": "long_tail",
+    "stage": "collecting_amount",
+    "slots_in": {"verified": true},
+    "input": "stop, I want to cancel",
+    "expected": {
+      "intent": "negate",
+      "slots": {}
+    }
+  },
+  {
+    "id": "ambiguous_maybe",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"amount": "500"},
+    "input": "maybe",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {}
+    }
+  },
+  {
+    "id": "off_script_account_id_in_confirmation",
+    "subset": "long_tail",
+    "stage": "awaiting_payment_confirmation",
+    "slots_in": {"account_id": "ACC1001", "amount": "500"},
+    "input": "actually my account is ACC1002",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"account_id": "ACC1002"}
+    },
+    "notes": "ANNOTATION RULE #2: extractor still extracts the slot; orchestrator's lock-once-filled rule no-ops the merge downstream"
+  },
+  {
+    "id": "off_topic_chatter",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001"},
+    "input": "what's the weather like today",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {}
+    }
+  },
+  {
+    "id": "empty_input",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001"},
+    "input": "",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {}
+    }
+  },
+  {
+    "id": "single_word_garbage",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001"},
+    "input": "asdf",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {}
+    }
+  },
+  {
+    "id": "card_partial_pan_only",
+    "subset": "long_tail",
+    "stage": "collecting_card",
+    "slots_in": {},
+    "input": "card number 4532015112830366",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"pan": "4532015112830366"}
+    },
+    "notes": "partial card fill; cvv/expiry come in a later turn"
+  },
+  {
+    "id": "name_with_extra_whitespace",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"account_id": "ACC1001"},
+    "input": "I am Nithin   Jain",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"full_name": "Nithin   Jain"}
+    },
+    "notes": "literal input preserved per tool-schema rule 'capture exactly as stated'; verify._canonicalize_name collapses internal whitespace downstream — eval consistency, not verification correctness"
+  },
+  {
+    "id": "dob_with_dots",
+    "subset": "long_tail",
+    "stage": "collecting_identity",
+    "slots_in": {"full_name": "Asha Reddy"},
+    "input": "13.04.1990",
+    "expected": {
+      "intent": "ambiguous",
+      "slots": {"dob": "1990-04-13"}
+    },
+    "notes": "dot separator; only DD-MM valid"
+  },
+  {
+    "id": "dob_disambiguation_affirm",
+    "subset": "long_tail",
+    "stage": "dob_disambiguation",
+    "slots_in": {"dob": "1990-05-04"},
+    "input": "yes that's correct",
+    "expected": {
+      "intent": "affirm",
+      "slots": {}
+    }
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "id": "dob_disambiguation_success",
+  "description": "ACC1003 user provides an ambiguous numeric DOB (10-08-1992 — DD-MM=Aug 10 vs MM-DD=Oct 8, both plausible) and resolves it via the v2 two-option disambiguation. The user replies 'August 10' (no year) and the (month, day) match against the stored disamb options resolves to 1992-08-10 with the year carried from the original input. Verify passes against ACC1003's on-file Aug 10 1992. End-to-end demonstration of the v2 disambiguation upgrade + tightened LLM ambiguity flagging. Dialog ends at the post-verify amount-collection prompt because ACC1003 has a 0 balance and cannot complete a payment — the persona's purpose is the verification path, not payment.",
+  "dialog": [
+    "ACC1003",
+    "Priya Agarwal, DOB 10-08-1992",
+    "August 10"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "insufficient_balance_recovery",
+  "description": "ACC1001 user attempts to pay 2000 (exceeds balance of 1250.75) -> stub returns insufficient_balance -> agent re-prompts for a smaller amount -> 500 succeeds. Exercises DECISIONS #4 unbounded re-prompt path: insufficient_balance does NOT consume payment_retries budget. Replaces the originally-planned typo-class recovery persona because the lookup-account stub appears to accept any well-formed CVV — the API-driven INVALID_CVV path is exercised in test_agent.py and test_state_transitions.py via mocked api responses; this persona covers the broader 'payment failure -> user corrects -> success' loop end-to-end against the real stub.",
+  "dialog": [
+    "ACC1001",
+    "Nithin Jain, DOB 14-05-1990",
+    "2000",
+    "Card 4532 0151 1283 0366, CVV 123, expires 12/27",
+    "yes",
+    "500",
+    "yes"
+  ]
+}
