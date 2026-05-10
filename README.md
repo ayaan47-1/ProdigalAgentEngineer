@@ -23,7 +23,7 @@ Python 3.11+ required.
 ### Interactive CLI
 
 ```bash
-python -m payment_agent.cli
+python3 -m payment_agent.cli
 ```
 
 The agent greets on startup. Type messages to continue the conversation. `quit`, `exit`, or `Ctrl-D` to leave; `Ctrl-C` to interrupt.
@@ -46,7 +46,7 @@ The interface is exactly `Agent.next(user_input: str) -> dict[str, str]` per the
 ## Tests
 
 ```bash
-python -m pytest tests/ --cov=payment_agent --cov-report=term-missing
+python3 -m pytest tests/ --cov=payment_agent --cov-report=term-missing
 ```
 
 553 unit + integration tests, ~95% package coverage, runs in ~1 second.
@@ -59,9 +59,9 @@ Two complementary eval surfaces.
 
 ```bash
 set -a && source .env && set +a
-python -m eval.runner                              # all 7
-python -m eval.runner --persona happy_path         # one
-python -m eval.runner --no-transcripts             # don't write sample_conversations/
+python3 -m eval.runner                              # all 7
+python3 -m eval.runner --persona happy_path         # one
+python3 -m eval.runner --no-transcripts             # don't write sample_conversations/
 ```
 
 Personas exercise full-stack behavior end-to-end. Captures markdown transcripts to `sample_conversations/`. Cost: ~$0.15 per full run.
@@ -69,9 +69,9 @@ Personas exercise full-stack behavior end-to-end. Captures markdown transcripts 
 ### Extractor pass-bar eval (53-case corpus, real LLM)
 
 ```bash
-python -m eval.extractor_eval
-python -m eval.extractor_eval --subset critical
-python -m eval.extractor_eval --case-id leap_year_iso_acc1004
+python3 -m eval.extractor_eval
+python3 -m eval.extractor_eval --subset critical
+python3 -m eval.extractor_eval --case-id leap_year_iso_acc1004
 ```
 
 Pass bars per DECISIONS #25: **100% on critical subset, 95% overall**. Currently 12/12 critical (100%) and 51/53 overall (96.2%). The 2 long-tail misses are documented in the corpus `notes` and discussed in the design doc.
