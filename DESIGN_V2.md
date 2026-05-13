@@ -389,6 +389,15 @@ Prioritised:
   a single `LlmCallFailed`. Auth (401) is unrecoverable and should
   terminate; rate-limit (429) should retry with backoff; transient
   network should retry once.
+- **Prompt caching on system prompt + tool schemas.** ~3,100 tokens of
+  stable per-call overhead (system prompt v1.2.0 ~1,200 tokens + tool
+  catalog ~1,900 tokens) × every LLM call adds up at scale. Anthropic
+  SDK `cache_control: {"type": "ephemeral"}` on the system block and
+  tools block gives ~70-80% input-cost reduction with a 5-minute TTL.
+  Particularly relevant for back-to-back eval runs (3-of-3 critical
+  + the four-fix iteration cycle in task 8 spent ~7M tokens that
+  would have been ~1.5M with caching). One change in `llm.py`; the
+  closed-kwarg-whitelist test gets one new allowed kwarg.
 - **Position-aware forbidden-substring sweep** to handle Hard Rule #4's
   echo carve-out cleanly.
 - **Structured logging with a redaction filter.** `api.py` and the
