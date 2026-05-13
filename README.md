@@ -2,7 +2,11 @@
 
 A conversational agent that collects card payments end-to-end against a stubbed REST API. Take-home assignment for an Agent Engineer role.
 
-> Architecture, key decisions, tradeoffs, and what's next: see [`DESIGN.md`](./DESIGN.md).
+> **v2 architecture (current).** LLM-orchestrated tool-use loop with kernel-mediated guardrails. The LLM emits every spec-API tool call (`lookup_account`, `process_payment`); the v1 kernel survives as the tool-mediated guardrail layer.
+> - **[`DESIGN_V2.md`](./DESIGN_V2.md)** — architecture memo, defense-in-depth map, eval strategy, iteration findings, tradeoffs.
+> - **[`DECISIONS_V2.md`](./DECISIONS_V2.md)** — 42 locked decisions.
+>
+> v1 artifacts (`DESIGN.md`) describe the original 16-stage FSM submission and are retained for context only.
 
 ## Quick start
 
@@ -28,7 +32,7 @@ python3 -m payment_agent.cli
 
 The agent greets on startup. Type messages to continue the conversation. `quit`, `exit`, or `Ctrl-D` to leave; `Ctrl-C` to interrupt.
 
-Without `ANTHROPIC_API_KEY` set, the agent falls back to a deterministic regex-only extraction path (DECISIONS #18). Most natural-language inputs land as AMBIGUOUS and trigger re-prompts; structured inputs (`ACC1001`, `yes`, `no`) still work.
+`ANTHROPIC_API_KEY` is required — v2 orchestration cannot fall back to a deterministic-only path (DECISIONS_V2 V2-31). Without the key, `Agent.next()` returns a "trouble responding" fallback message and the session does not progress.
 
 ### Programmatic
 
@@ -36,12 +40,17 @@ Without `ANTHROPIC_API_KEY` set, the agent falls back to a deterministic regex-o
 from payment_agent.agent import Agent
 
 agent = Agent()  # reads ANTHROPIC_API_KEY from env
-print(agent.next(""))         # bootstrap greeting
+print(agent.next(""))         # bootstrap greeting (LLM-driven)
 print(agent.next("ACC1001"))
-# {"message": "I've found your account. To verify your identity, ..."}
+# {"message": "Account found. To verify your identity, please provide ..."}
+
+# For tests, inject a fake LLM:
+agent = Agent(api_key="x", llm_call=my_fake_llm)
+# agent.snapshot() returns a frozen dict view of SessionState +
+# a last_tool_calls summary, useful for eval assertions.
 ```
 
-The interface is exactly `Agent.next(user_input: str) -> dict[str, str]` per the spec. State persists across calls within an `Agent` instance; instantiate a fresh `Agent()` per session per DECISIONS #6 and #11.
+The interface is exactly `Agent.next(user_input: str) -> dict[str, str]` per the spec. State persists across calls within an `Agent` instance; instantiate a fresh `Agent()` per session per DECISIONS_V2 V2-1 (one payment per instance).
 
 ## Tests
 
@@ -49,103 +58,113 @@ The interface is exactly `Agent.next(user_input: str) -> dict[str, str]` per the
 python3 -m pytest tests/ --cov=payment_agent --cov-report=term-missing
 ```
 
-553 unit + integration tests, ~95% package coverage, runs in ~1 second.
+451 unit + integration tests covering the v2 kernel (session, tools, agent, prompt, harness) plus surviving v1 modules (api, validate, verify, redact, llm_kwargs, cli). Runs in ~1 second. Coverage on new modules: session.py 100%, tools.py 90%, agent.py 89%, prompt.py 100%, harness 98%.
 
 ## Eval
 
-Two complementary eval surfaces.
-
-### Persona-driven integration (7 personas, real LLM + real API stub)
+Two-tier persona suite per DECISIONS_V2 §V2-26: 13 functionality + 13 compliance personas, programmatic assertions only (no LLM-as-judge). The harness drives a fresh `Agent` through each persona's scripted turns against the real prodigaltech.com stub.
 
 ```bash
 set -a && source .env && set +a
-python3 -m eval.runner                              # all 7
-python3 -m eval.runner --persona happy_path         # one
-python3 -m eval.runner --no-transcripts             # don't write sample_conversations/
+python3 -m eval.runner                                        # all 26
+python3 -m eval.runner --persona happy_path                   # one
+python3 -m eval.runner --tier compliance                      # one tier
+python3 -m eval.runner --multi-run-critical 3                 # V2-28 stability bar
+python3 -m eval.runner --inter-persona-sleep 5 --no-transcripts
 ```
 
-Personas exercise full-stack behavior end-to-end. Captures markdown transcripts to `sample_conversations/`. Cost: ~$0.15 per full run.
+**Pass bars (DECISIONS_V2 V2-27):** 100% critical (3-of-3 runs), 95% Tier 1 overall (1 run), 90% Tier 2 overall (1 run).
 
-### Extractor pass-bar eval (53-case corpus, real LLM)
+**Cost:** ~$0.20 per full 1-of-1 pass at Sonnet 4.6. 3-of-3 critical requires a Tier 2+ Anthropic API key to fit under the per-minute RPM cap (63 sessions back-to-back bursts past Tier-1 50 RPM — DESIGN_V2 §9).
 
-```bash
-python3 -m eval.extractor_eval
-python3 -m eval.extractor_eval --subset critical
-python3 -m eval.extractor_eval --case-id leap_year_iso_acc1004
-```
-
-Pass bars per DECISIONS #25: **100% on critical subset, 95% overall**. Currently 12/12 critical (100%) and 51/53 overall (96.2%). The 2 long-tail misses are documented in the corpus `notes` and discussed in the design doc.
+**Forbidden-substring sweep:** runs automatically on every persona. Detects PAN regex / CVV-context patterns and per-account on-file values (`eval/account_fixtures.py`) in any agent reply.
 
 ## Sample conversations
 
-Captured runs from the persona suite — real LLM extraction + real API responses, not hand-crafted (per DECISIONS #27).
+26 captured runs from the v2 persona suite — real LLM (Sonnet 4.6, temperature=0) + real prodigaltech.com responses. Regenerated by `python3 -m eval.runner`.
 
-- [`sample_conversations/happy_path.md`](./sample_conversations/happy_path.md) — successful payment cycle (ACC1001 → verify via DOB → ₹500)
-- [`sample_conversations/verification_exhausted.md`](./sample_conversations/verification_exhausted.md) — 4 wrong DOBs, terminal exhaustion
-- [`sample_conversations/leap_year_acc1004.md`](./sample_conversations/leap_year_acc1004.md) — leap-year DOB canary (ACC1004, DOB 1988-02-29)
-- [`sample_conversations/insufficient_balance_recovery.md`](./sample_conversations/insufficient_balance_recovery.md) — payment fails (₹2000 > balance), user reduces to ₹500, succeeds
-- [`sample_conversations/cancellation_during_verify.md`](./sample_conversations/cancellation_during_verify.md) — polite refusal routes to `terminal_cancelled`
-- [`sample_conversations/dob_disambiguation_success.md`](./sample_conversations/dob_disambiguation_success.md) — ACC1003 + "10-08-1992" → v2 two-option prompt → user picks "August 10" → (m,d) match resolves with stored year → verify success
-- [`sample_conversations/alternate_factor_recovery.md`](./sample_conversations/alternate_factor_recovery.md) — ACC1001 + ambiguous DOB → wrong reading → switch to pincode → wrong pincode → correct DOB → verify success → payment
+Tier 1 (functionality):
+- [`happy_path`](./sample_conversations/happy_path.md), [`_aadhaar`](./sample_conversations/happy_path_aadhaar.md), [`_pincode`](./sample_conversations/happy_path_pincode.md) — successful payments via each secondary factor
+- [`verification_failure_then_recovery`](./sample_conversations/verification_failure_then_recovery.md), [`verification_exhausted`](./sample_conversations/verification_exhausted.md) — retry budget exercise
+- [`insufficient_balance_recovery`](./sample_conversations/insufficient_balance_recovery.md), [`local_card_validation_failure`](./sample_conversations/local_card_validation_failure.md) — payment-side recovery
+- [`leap_year_acc1004`](./sample_conversations/leap_year_acc1004.md) — 1988-02-29 strict-parse canary
+- [`dob_disambiguation`](./sample_conversations/dob_disambiguation.md) — ACC1003 + ambiguous 10-08-1992
+- [`account_not_found`](./sample_conversations/account_not_found.md), [`cancellation_during_verify`](./sample_conversations/cancellation_during_verify.md), [`greeting_then_account`](./sample_conversations/greeting_then_account.md), [`multi_factor_attempt_sequence`](./sample_conversations/multi_factor_attempt_sequence.md)
+
+Tier 2 (compliance):
+- Jailbreak / identity pivot: [`jailbreak_ignore_instructions`](./sample_conversations/jailbreak_ignore_instructions.md), [`identity_pivot_mid_cycle`](./sample_conversations/identity_pivot_mid_cycle.md), [`prompt_injection_in_name`](./sample_conversations/prompt_injection_in_name.md)
+- PII exfiltration: [`pan_exfiltration`](./sample_conversations/pan_exfiltration.md), [`dob_exfiltration`](./sample_conversations/dob_exfiltration.md), [`pincode_exfiltration`](./sample_conversations/pincode_exfiltration.md)
+- Retry-cap bypass / confirmation skip: [`retry_cap_bypass_plead`](./sample_conversations/retry_cap_bypass_plead.md), [`confirmation_skip`](./sample_conversations/confirmation_skip.md)
+- Scope shifts: [`scope_shift_refund`](./sample_conversations/scope_shift_refund.md), [`scope_shift_password_change`](./sample_conversations/scope_shift_password_change.md)
+- Anti-enumeration / verification skip / double payment: [`account_enumeration`](./sample_conversations/account_enumeration.md), [`verification_skip_attempt`](./sample_conversations/verification_skip_attempt.md), [`double_payment_attempt`](./sample_conversations/double_payment_attempt.md)
 
 ## Project structure
 
 ```
 .
-├── DESIGN.md                           # architecture + tradeoffs writeup
+├── DESIGN_V2.md                        # v2 architecture memo (current)
+├── DECISIONS_V2.md                     # v2 locked decisions (42)
+├── DESIGN.md                           # v1 retained for context
 ├── README.md                           # this file
 ├── pyproject.toml
 ├── requirements.txt
 ├── .env.example
 ├── src/payment_agent/
-│   ├── agent.py                        # public Agent class + per-turn orchestration
-│   ├── state.py                        # 16-stage state machine + slot store + transitions
-│   ├── extract.py                      # single-LLM-call slot + intent extraction
-│   ├── llm.py                          # thin Anthropic SDK wrapper (only module that imports anthropic)
-│   ├── api.py                          # HTTP client for /api/lookup-account, /api/process-payment
+│   ├── agent.py                        # tool-use loop orchestrator + Agent.next/snapshot
+│   ├── session.py                      # SessionState dataclass + substates (V2-12)
+│   ├── tools.py                        # 5 tool wrappers + JSON schemas + 10 canonical templates
+│   ├── prompt.py                       # versioned system prompt + sentinel constants
+│   ├── llm.py                          # Anthropic SDK wrapper (only module that imports anthropic)
+│   ├── api.py                          # HTTP client + wire-types (LookupOutcome, PaymentOutcome, …)
 │   ├── validate.py                     # Luhn, expiry, DOB strict-parse, amount, account-id
 │   ├── verify.py                       # strict-equality identity comparators
-│   ├── templates.py                    # render(slots, message_key) → str
-│   ├── redact.py                       # CVV/PAN/PII scrubbing
+│   ├── redact.py                       # CVV/PAN/PII scrubbing + history scrub helper
 │   ├── errors.py                       # typed exceptions
-│   ├── config.py                       # determinism contract + retry caps + timeouts
+│   ├── config.py                       # determinism contract + retry caps + ITERATION_CAP=6
 │   └── cli.py                          # interactive REPL
 ├── eval/
 │   ├── harness.py                      # run_persona drives Agent through scripted dialog
-│   ├── runner.py                       # CLI for persona suite
-│   ├── extractor_eval.py               # corpus-based extractor pass-bar runner
-│   ├── personas/                       # 7 JSON dialog scripts
-│   ├── assertions/                     # 7 Python modules (state-based assertions)
-│   └── corpus/extraction.json          # 53-case extraction corpus
-├── sample_conversations/               # 7 captured transcripts
-└── tests/                              # 553 tests across 11 files
+│   ├── runner.py                       # CLI for persona suite (--tier / --multi-run-critical / --inter-persona-sleep)
+│   ├── forbidden_substrings.py         # PAN/CVV regex + per-account exact-substring sweep
+│   ├── account_fixtures.py             # known on-file values for ACC1001-1004 (eval-internal)
+│   ├── personas/
+│   │   ├── functionality/              # 13 JSON dialog scripts
+│   │   └── compliance/                 # 13 JSON dialog scripts
+│   └── assertions/                     # 26 Python modules + _helpers.py
+├── sample_conversations/               # 26 captured transcripts
+└── tests/                              # 451 tests across 11 files
 ```
 
 ## Configuration
 
 | Variable | Required | Description |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | recommended | Anthropic API key. Without it, extraction falls back to regex-only mode (DECISIONS #18). |
+| `ANTHROPIC_API_KEY` | yes | Anthropic API key. v2 orchestration requires the LLM (DECISIONS_V2 V2-31). |
 
-`.env.example` shows the full list. The model and retry caps are pinned in `src/payment_agent/config.py` per the determinism contract (DECISIONS #8 + #19 + #20) and intentionally not env-overridable.
+`.env.example` shows the full list. The model (`claude-sonnet-4-6`), retry caps, and `ITERATION_CAP=6` are pinned in `src/payment_agent/config.py` per the determinism contract (DECISIONS_V2 V2-31 + V2-32) and intentionally not env-overridable.
 
 ## Hard rules enforced
 
-- No payment without successful verification
+Each rule lives in ≥ 2 of {system prompt, tool wrapper, eval}. See the rules-to-layers map in [`DESIGN_V2.md` §3](./DESIGN_V2.md).
+
+- No payment without successful verification (tool: `NOT_VERIFIED` precondition)
 - Strict (non-fuzzy) name match + one secondary factor (DOB / Aadhaar last-4 / pincode)
-- All inputs validated locally before any API call
-- Sensitive data (DOB, Aadhaar, pincode, full PAN, CVV, full name) never echoed in agent responses
-- 3 verification retries → `terminal_verification_exhausted`
-- 5 typo-class payment retries → `terminal_payment_exhausted`; `insufficient_balance` re-prompts unbounded
-- Lookup retries: 1 silent transient (500ms backoff) + 3 user-visible
-- `process_payment` is **never retried** on transient failure (no idempotency key — DECISIONS #13); routes to `terminal_payment_unknown`
-- All documented error codes (`account_not_found`, `invalid_amount`, `insufficient_balance`, `invalid_card`, `invalid_cvv`, `invalid_expiry`) handled with actionable user copy
+- All inputs validated locally before any API call (`stage=local_validation` never burns a retry)
+- Sensitive data (DOB, Aadhaar, pincode, full PAN, CVV) never echoed in agent replies; forbidden-substring sweep audits every transcript
+- Verification: 3 attempts before `terminal_verification_exhausted` (V2-5 intuitive counter semantic — kernel terminates when counter hits 0 after the failing attempt)
+- Payment typo-class retries: 5 before `terminal_payment_exhausted`; `insufficient_balance` re-prompts unbounded
+- Lookup: 1 silent transient (500ms backoff) + 3 transparent retries, all kernel-internal in one `lookup_account` call
+- `process_payment` is **never retried** on transient failure (no idempotency key); routes to `terminal_payment_unknown`
+- Anti-pivot: first `full_name` in a verification cycle locks the slot; different name → `CYCLE_VIOLATION_NAME` (no retry burn)
+- Confirmation gate is **structural** (V2-11): emitting `confirmation_prompt` sets `confirmation_pending = {amount, last4}`; `process_payment` requires matching values
+- Anti-enumeration: `ACCOUNT_NOT_FOUND` is immediate-terminal; second `lookup_account` returns `ACCOUNT_ALREADY_LOOKED_UP`
 
 ## Known limitations
 
-See [`DESIGN.md`](./DESIGN.md) "Where the agent struggles" for the full writeup. Short version:
+See [`DESIGN_V2.md` §9 "Tradeoffs and limitations"](./DESIGN_V2.md) for the full writeup. Short version:
 
-- The extractor has 2 long-tail misses: explicit Aadhaar factor selection and exact preservation of extra whitespace in a name. Both have zero functional impact because deterministic code infers the factor and canonicalizes names before verification.
-- The live API stub appears to accept any well-formed CVV, so CVV typo recovery is covered by mocked integration tests rather than a live persona.
-- Direct `Agent.next("hi")` skips the greeting prefix and goes straight to account-ID collection. The CLI avoids this by bootstrapping with `agent.next("")`.
-- Two message-key drift bugs were caught only by persona transcripts, which is why the eval suite remains part of the submission even with high unit-test coverage.
+- Less automated safety than v1 (orchestration moved to the LLM; 451 unit tests vs v1's 548). Eval suite is the safety net for orchestration behavior.
+- 3-of-3 critical eval pass needs a Tier 2+ Anthropic API key — 63 sessions × ~5 LLM calls bursts past Tier-1 50 RPM.
+- Confirmation gate is structural but the LLM chooses *when* to emit `confirmation_prompt` (kernel refuses payment if it hasn't). Account-ID echo rule is prompt-only.
+- Forbidden-substring sweep is strict: if the LLM legitimately echoes a user-just-provided DOB for disambiguation (allowed by Hard Rule #4 carve-out) AND that value matches the on-file DOB, the sweep flags it. Production fix is a position-aware sweep.
+- Two V2-26 personas (`invalid_card_recovery`, `payment_unknown_terminal`) are unit-test-only — the prodigaltech.com stub accepts any well-formed card and doesn't simulate transient failures.
