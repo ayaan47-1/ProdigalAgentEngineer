@@ -1,0 +1,18 @@
+{
+  "persona_id": "insufficient_balance_recovery",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 (balance ₹1,250.75) user requests ₹2,000 (rejected), then ₹500 (succeeds). Validates V2-7 rule that INSUFFICIENT_BALANCE re-prompts unbounded and does not burn the payment retry counter.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain, my DOB is 1990-05-14"},
+    {"user_input": "2000"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"},
+    {"user_input": "Sorry, let me try 500 instead"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}

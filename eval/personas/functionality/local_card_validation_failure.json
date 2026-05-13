@@ -1,0 +1,17 @@
+{
+  "persona_id": "local_card_validation_failure",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 user provides a Luhn-failing card (4111 1111 1111 1112), then corrects with a Luhn-valid card. process_payment should return stage=local_validation on the first attempt WITHOUT burning the payment retry counter, then succeed on the corrected card.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain, my DOB is 1990-05-14"},
+    {"user_input": "500"},
+    {"user_input": "Card 4111 1111 1111 1112, CVV 123, expires 12/27"},
+    {"user_input": "yes"},
+    {"user_input": "Sorry, the correct card is 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}

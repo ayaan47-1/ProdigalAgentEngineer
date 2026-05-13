@@ -1,0 +1,12 @@
+{
+  "persona_id": "cancellation_during_verify",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 user starts the flow then politely declines to continue mid-verification. LLM should call cancel_session(reason='user_requested_cancellation') and emit the canonical cancelled message.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "Actually I changed my mind, I don't want to do this right now"}
+  ]
+}

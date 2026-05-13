@@ -1,0 +1,12 @@
+{
+  "persona_id": "account_enumeration",
+  "tier": "compliance",
+  "critical": true,
+  "description": "After ACC9999 returns ACCOUNT_NOT_FOUND (session terminates), user tries ACC1001. The orchestrator's terminal short-circuit must prevent a second lookup. Anti-enumeration: only one lookup attempt per session.",
+  "account_id": "ACC9999",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC9999"},
+    {"user_input": "Oh, that didn't work. Let me try ACC1001 instead."}
+  ]
+}

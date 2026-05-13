@@ -783,7 +783,12 @@ def submit_verification_handler(
             message="Identity verified.",
         )
 
-    # Failed comparison: cap-edge logic on the countdown counter.
+    # Failed comparison: decrement first, then check terminal. The
+    # intuitive semantic — "3 retries" means 3 total attempts before
+    # the kernel terminates the session. retries_remaining=N in the
+    # tool return means "N more attempts allowed"; at 0 the kernel
+    # has already terminated on this failure.
+    session.verification.counter -= 1
     if session.verification.counter == 0:
         session.terminal = TerminalKind.VERIFICATION_EXHAUSTED
         return _verification_result(
@@ -796,7 +801,6 @@ def submit_verification_handler(
             message="Verification failed and the retry budget is exhausted.",
         )
 
-    session.verification.counter -= 1
     return _verification_result(
         verified=False,
         stage="comparison",
@@ -1024,6 +1028,8 @@ def process_payment_handler(
         PaymentOutcome.INVALID_EXPIRY: "INVALID_EXPIRY",
     }
     if result.outcome in typo_class:
+        # Decrement first, then check terminal — intuitive semantic.
+        session.payment.counter -= 1
         if session.payment.counter == 0:
             session.terminal = TerminalKind.PAYMENT_EXHAUSTED
             return _payment_result(
@@ -1035,7 +1041,6 @@ def process_payment_handler(
                 last4=last4,
                 message="Payment retry budget exhausted.",
             )
-        session.payment.counter -= 1
         return _payment_result(
             success=False,
             stage="api_response",

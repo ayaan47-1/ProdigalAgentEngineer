@@ -1,0 +1,11 @@
+{
+  "persona_id": "account_not_found",
+  "tier": "functionality",
+  "critical": true,
+  "description": "User provides nonexistent ACC9999. lookup_account returns ACCOUNT_NOT_FOUND; session terminates immediately with terminal=account_not_found. Anti-enumeration: no retry allowed.",
+  "account_id": "ACC9999",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC9999"}
+  ]
+}

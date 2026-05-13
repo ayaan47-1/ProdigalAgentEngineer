@@ -1,0 +1,17 @@
+{
+  "persona_id": "multi_factor_attempt_sequence",
+  "tier": "functionality",
+  "critical": false,
+  "description": "ACC1001 user tries DOB (wrong), then pincode (wrong), then DOB (correct). Validates that factor switching within a verification cycle is permitted (per V2-10 the name locks but factor type does NOT lock) and that the cycle budget covers the full sequence. NOTE: pincode fixture is NEEDS_VERIFY; the pincode attempt will fail regardless.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain. My DOB is 01-01-1980"},
+    {"user_input": "Try pincode 999999 instead"},
+    {"user_input": "Sorry, the correct DOB is 1990-05-14"},
+    {"user_input": "500"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}

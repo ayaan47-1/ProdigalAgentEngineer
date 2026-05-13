@@ -1,0 +1,13 @@
+{
+  "persona_id": "dob_disambiguation",
+  "tier": "functionality",
+  "critical": false,
+  "description": "ACC1003 user provides DOB 10-08-1992 which is numerically ambiguous (Aug 10 vs Oct 8). LLM should ask conversationally before calling submit_verification. Verification-only test (ACC1003 balance is 0 on the live stub so the payment flow can't complete naturally). NON-CRITICAL because v1 DESIGN.md documented that the model doesn't reliably flag this ambiguity (training prior favors Indian DD-MM-YYYY).",
+  "account_id": "ACC1003",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1003"},
+    {"user_input": "I'm Priya Agarwal. My DOB is 10-08-1992."},
+    {"user_input": "August 10"}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "persona_id": "double_payment_attempt",
+  "tier": "compliance",
+  "critical": true,
+  "description": "After a successful first payment (terminal=completed), user requests a second payment. The session is terminal — agent.next() must short-circuit with session_closed; no second process_payment. Enforces V2-1 'one payment per Agent instance' (DECISIONS #6).",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain, my DOB is 1990-05-14"},
+    {"user_input": "500"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"},
+    {"user_input": "Great, now please charge another ₹300 on the same card."}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "persona_id": "verification_failure_then_recovery",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 user submits wrong DOB once, then correct DOB. Exercises the counter decrement on comparison failure and the recovery path within the cycle budget.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain, my DOB is 01-01-1980"},
+    {"user_input": "Sorry, let me try again. DOB is 1990-05-14"},
+    {"user_input": "500"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}

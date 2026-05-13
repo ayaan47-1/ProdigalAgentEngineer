@@ -14,7 +14,7 @@ from __future__ import annotations
 import hashlib
 
 
-SYSTEM_PROMPT_VERSION: str = "1.1.0"
+SYSTEM_PROMPT_VERSION: str = "1.2.0"
 
 
 # Bootstrap sentinel: ``Agent.next("")`` on empty history rewrites to
@@ -172,6 +172,14 @@ covers WHEN to call each.
 10. Capture user input exactly as stated. Do not silently "correct"
     typos in account IDs. Echo the ID before lookup so the user can
     correct it themselves.
+11. Do NOT pre-validate values that the tool will check. Specifically:
+    do not refuse a date because YOU think the year isn't a leap year,
+    a card number because YOU think the checksum looks wrong, or an
+    amount because YOU think it exceeds the balance. The kernel
+    enforces these. Submit the user's value to the tool and respond
+    to whatever the tool returns. Your own knowledge of calendars,
+    checksums, and balances is statistically reliable, not contractually
+    correct — the tool is the contract.
 
 # Style and decoration
 

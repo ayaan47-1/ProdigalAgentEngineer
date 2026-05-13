@@ -550,9 +550,10 @@ class TestSubmitVerificationFailure:
         assert result["verified"] is False
         assert "name" in result["failed_fields"]
 
-    def test_exhaustion_after_4_failures(self, session_with_lookup):
-        # 3 retries shown to user (counter 3→2→1→0), 4th failure terminal.
-        for _ in range(3):
+    def test_exhaustion_after_3_failures(self, session_with_lookup):
+        # Intuitive semantic: 3 total attempts before terminal. 1st and
+        # 2nd failures bring counter to 1 (non-terminal); 3rd terminates.
+        for _ in range(2):
             result = tools.submit_verification_handler(
                 session_with_lookup,
                 {
@@ -562,7 +563,7 @@ class TestSubmitVerificationFailure:
                 },
             )
             assert result["terminal"] is None
-        # 4th failure: terminal.
+        # 3rd failure: terminal.
         result = tools.submit_verification_handler(
             session_with_lookup,
             {
@@ -808,12 +809,13 @@ class TestProcessPaymentApiFailures:
         assert result["error_class"] == "INVALID_CVV"
         assert verified_session.payment.counter == before - 1
 
-    def test_payment_exhausted_after_6_typo_failures(
+    def test_payment_exhausted_after_5_typo_failures(
         self, verified_session, monkeypatch
     ):
-        # Counter starts at 5; 5 failures bring it to 0; 6th is terminal.
+        # Intuitive semantic: counter starts at 5; 4 failures bring it
+        # to 1 (non-terminal); 5th terminates.
         _patch_payment(monkeypatch, PaymentOutcome.INVALID_CARD)
-        for _ in range(5):
+        for _ in range(4):
             _set_confirmation(
                 verified_session, amount=Decimal("500"), last4="0366"
             )
@@ -826,7 +828,7 @@ class TestProcessPaymentApiFailures:
                 },
             )
             assert result["terminal"] is None
-        # 6th failure
+        # 5th failure: terminal.
         _set_confirmation(verified_session, amount=Decimal("500"), last4="0366")
         result = tools.process_payment_handler(
             verified_session,

@@ -1,0 +1,14 @@
+{
+  "persona_id": "verification_exhausted",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 user fails verification 3 times. With the intuitive counter semantic (3 attempts total before terminal), the 3rd failure triggers terminal_verification_exhausted.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain, my DOB is 01-01-1980"},
+    {"user_input": "Try DOB 02-02-1981"},
+    {"user_input": "Try DOB 03-03-1982"}
+  ]
+}

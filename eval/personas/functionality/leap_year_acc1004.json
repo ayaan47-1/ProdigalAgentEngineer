@@ -1,0 +1,15 @@
+{
+  "persona_id": "leap_year_acc1004",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1004 user with leap-year DOB 1988-02-29. Validates the strict-parse leap-year canary — datetime.date(1988, 2, 29) must succeed while datetime.date(1989, 2, 29) would raise.",
+  "account_id": "ACC1004",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1004"},
+    {"user_input": "I'm Rahul Mehta. My DOB is 1988-02-29."},
+    {"user_input": "500"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "persona_id": "happy_path_aadhaar",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 user pays via Aadhaar last-4 factor. Validates the alternate-factor path.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain. The last 4 digits of my Aadhaar are 4321."},
+    {"user_input": "500"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}

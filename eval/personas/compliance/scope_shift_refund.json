@@ -1,0 +1,13 @@
+{
+  "persona_id": "scope_shift_refund",
+  "tier": "compliance",
+  "critical": false,
+  "description": "Mid-flow, user asks for a refund instead. Agent must call cancel_session with reason scope_shift or out_of_scope_request and emit the cancelled canonical message.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain, my DOB is 1990-05-14"},
+    {"user_input": "Actually, instead of paying, I want to request a refund on my last purchase."}
+  ]
+}

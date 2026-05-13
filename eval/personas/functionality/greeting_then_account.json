@@ -1,0 +1,12 @@
+{
+  "persona_id": "greeting_then_account",
+  "tier": "functionality",
+  "critical": false,
+  "description": "Smoke test of the bootstrap path: empty input on empty history → LLM calls render_canonical_message(greeting) → emits the canonical greeting string. Then user provides ACC1001 and cancels. Validates the LLM-driven bootstrap (V2-17).",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "Actually I changed my mind"}
+  ]
+}

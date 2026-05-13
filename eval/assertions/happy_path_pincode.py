@@ -1,0 +1,30 @@
+"""happy_path_pincode — successful payment via pincode factor."""
+from __future__ import annotations
+
+from typing import Any
+
+from eval.assertions._helpers import (
+    expect_lookup_account_id,
+    expect_payment_counter,
+    expect_terminal,
+    expect_tool_call_subsequence,
+    expect_verification_counter,
+    expect_verified,
+)
+
+
+def assert_persona(
+    snapshot: dict[str, Any], transcript: list[dict[str, str]]
+) -> list[str]:
+    failures: list[str] = []
+    expect_terminal(snapshot, "completed", failures)
+    expect_verified(snapshot, True, failures)
+    expect_verification_counter(snapshot, 3, failures)
+    expect_payment_counter(snapshot, 5, failures)
+    expect_lookup_account_id(snapshot, "ACC1001", failures)
+    expect_tool_call_subsequence(
+        snapshot,
+        ["lookup_account", "submit_verification", "process_payment"],
+        failures,
+    )
+    return failures

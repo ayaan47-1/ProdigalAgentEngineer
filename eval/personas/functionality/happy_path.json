@@ -1,0 +1,15 @@
+{
+  "persona_id": "happy_path",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 user pays ₹500 successfully via DOB factor. Exercises bootstrap, lookup, verification, amount collection, card collection, confirmation, payment, recap.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain, my DOB is 1990-05-14"},
+    {"user_input": "500"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}

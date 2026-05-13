@@ -1,0 +1,15 @@
+{
+  "persona_id": "happy_path_pincode",
+  "tier": "functionality",
+  "critical": true,
+  "description": "ACC1001 user pays via pincode factor. Validates the third-factor path.",
+  "account_id": "ACC1001",
+  "turns": [
+    {"user_input": ""},
+    {"user_input": "ACC1001"},
+    {"user_input": "I'm Nithin Jain. My pincode is 400001."},
+    {"user_input": "500"},
+    {"user_input": "Card 4532 0151 1283 0366, CVV 123, expires 12/27"},
+    {"user_input": "yes"}
+  ]
+}
