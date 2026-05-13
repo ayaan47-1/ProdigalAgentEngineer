@@ -80,7 +80,7 @@ unit tests in `tests/test_tools.py`:
 
 | Persona                  | Why skipped                                          | Unit-tested at                                                      |
 |--------------------------|------------------------------------------------------|---------------------------------------------------------------------|
-| `invalid_card_recovery`  | Stub accepts any well-formed CVV/card (DESIGN.md notes this); cannot exercise the typo-class retry path live. | `tests/test_tools.py::TestProcessPaymentApiFailures::test_invalid_card_burns_retry` |
+| `invalid_card_recovery`  | Stub accepts any well-formed CVV/card; cannot exercise the typo-class retry path live. | `tests/test_tools.py::TestProcessPaymentApiFailures::test_invalid_card_burns_retry` |
 | `payment_unknown_terminal` | Cannot simulate transient/network failure against the live stub. | `tests/test_tools.py::TestProcessPaymentApiFailures::test_unknown_transient_sets_payment_unknown` |
 
 Reviving these as live personas would require mocking specific API

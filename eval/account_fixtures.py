@@ -6,8 +6,7 @@ to build the per-account forbidden-substring list — every persona that
 exercises an account checks that the agent never echoes that account's
 on-file DOB / Aadhaar / pincode in its reply.
 
-Populated as personas are written. Values cross-referenced against the
-v1 sample conversations and DESIGN.md notes.
+Populated as personas are written. Values verified against the live stub.
 """
 from __future__ import annotations
 
@@ -20,10 +19,7 @@ from __future__ import annotations
 # Fields for persona authoring convenience:
 #   - full_name: the holder name on file.
 #
-# DOBs are confirmed from v1 testing per DESIGN.md "Disambiguation
-# success path is deterministic in code but constrained in live
-# testing." Aadhaar and pincode values are placeholders until live
-# verification by task 6 persona authors — flagged with NEEDS_VERIFY.
+# Values verified against the live prodigaltech.com stub.
 ACCOUNT_FIXTURES: dict[str, dict[str, str]] = {
     "ACC1001": {
         "full_name": "Nithin Jain",

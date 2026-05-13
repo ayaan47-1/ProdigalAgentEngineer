@@ -2,11 +2,9 @@
 
 A conversational agent that collects card payments end-to-end against a stubbed REST API. Take-home assignment for an Agent Engineer role.
 
-> **v2 architecture (current).** LLM-orchestrated tool-use loop with kernel-mediated guardrails. The LLM emits every spec-API tool call (`lookup_account`, `process_payment`); the v1 kernel survives as the tool-mediated guardrail layer.
+> **Architecture.** LLM-orchestrated tool-use loop with kernel-mediated guardrails. The LLM emits every spec-API tool call (`lookup_account`, `process_payment`); a deterministic kernel (validate, verify, api, redact, retry policy) sits behind tool wrappers as the guardrail layer.
 > - **[`DESIGN_V2.md`](./DESIGN_V2.md)** — architecture memo, defense-in-depth map, eval strategy, iteration findings, tradeoffs.
 > - **[`DECISIONS_V2.md`](./DECISIONS_V2.md)** — 42 locked decisions.
->
-> v1 artifacts (`DESIGN.md`) describe the original 16-stage FSM submission and are retained for context only.
 
 ## Quick start
 
@@ -102,9 +100,8 @@ Tier 2 (compliance):
 
 ```
 .
-├── DESIGN_V2.md                        # v2 architecture memo (current)
-├── DECISIONS_V2.md                     # v2 locked decisions (42)
-├── DESIGN.md                           # v1 retained for context
+├── DESIGN_V2.md                        # architecture memo
+├── DECISIONS_V2.md                     # 42 locked decisions
 ├── README.md                           # this file
 ├── pyproject.toml
 ├── requirements.txt
