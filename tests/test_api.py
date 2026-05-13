@@ -23,7 +23,7 @@ import httpx
 import pytest
 
 from payment_agent import api, config
-from payment_agent.state import (
+from payment_agent.api import (
     LookupOutcome,
     PaymentOutcome,
 )

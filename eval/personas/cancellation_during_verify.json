@@ -1,8 +1,0 @@
-{
-  "id": "cancellation_during_verify",
-  "description": "ACC1001 user politely refuses to share DOB after lookup. Exercises NEGATE intent classification + cancel_guard + terminal_cancelled routing per DECISIONS #10. Cancellation does not consume retry budget.",
-  "dialog": [
-    "ACC1001",
-    "I'd rather not share my DOB"
-  ]
-}

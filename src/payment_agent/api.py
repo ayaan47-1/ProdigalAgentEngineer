@@ -35,12 +35,13 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
+from enum import StrEnum
 from typing import Any
 
 import httpx
-from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from payment_agent import config, redact
 from payment_agent.errors import (
@@ -50,15 +51,79 @@ from payment_agent.errors import (
     ApiUnexpectedResponse,
     ApiUnknown,
 )
-from payment_agent.state import (
-    LookupEffectResult,
-    LookupOutcome,
-    LookupResponse,
-    PaymentEffectResult,
-    PaymentOutcome,
-)
 
 _LOG = logging.getLogger(__name__)
+
+
+# ===========================================================================
+# Wire-format types (migrated from state.py in v2)
+# ===========================================================================
+#
+# These types describe the api wire format and the orchestrator-visible
+# result envelope. They live here because api.py is their only producer and
+# tools.py (their consumer) sources them from here. In v1 they lived in
+# state.py alongside the FSM; v2 re-homes them so the v1 FSM can die without
+# disturbing the api layer.
+
+
+class LookupOutcome(StrEnum):
+    """Discriminator for ``LookupEffectResult``."""
+
+    SUCCESS = "success"
+    ACCOUNT_NOT_FOUND = "account_not_found"
+    TRANSIENT = "transient"  # post-silent-retry transient failure (DECISIONS #13)
+
+
+class PaymentOutcome(StrEnum):
+    """Discriminator for ``PaymentEffectResult``.
+
+    ``INVALID_AMOUNT`` should never reach here per DECISIONS #4 — validators
+    must catch zero/negative/>2dp client-side. If it surfaces, it's a bug
+    in the validation layer.
+    """
+
+    SUCCESS = "success"
+    INVALID_CARD = "invalid_card"
+    INVALID_CVV = "invalid_cvv"
+    INVALID_EXPIRY = "invalid_expiry"
+    INVALID_AMOUNT = "invalid_amount"  # bug surface
+    INSUFFICIENT_BALANCE = "insufficient_balance"
+    UNKNOWN = "unknown"  # 5xx / timeout / undocumented 4xx (DECISIONS #13)
+
+
+class LookupResponse(BaseModel):
+    """Typed view of the ``lookup_account`` API response (per PDF spec).
+
+    Validated at the api.py boundary so wire-schema drift surfaces as
+    ``ValidationError`` here rather than as a silent downstream failure.
+    """
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+    account_id: str
+    full_name: str
+    dob: date
+    aadhaar_last4: str
+    pincode: str
+    balance: Decimal
+
+
+class LookupEffectResult(BaseModel):
+    """Internal result envelope for a single ``lookup_account`` call."""
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+    outcome: LookupOutcome
+    account_data: LookupResponse | None = None  # required when outcome == SUCCESS
+
+
+class PaymentEffectResult(BaseModel):
+    """Internal result envelope for a single ``process_payment`` call."""
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+    outcome: PaymentOutcome
+    transaction_id: str | None = None  # required when outcome == SUCCESS
 
 # Maps the API's process-payment error_code strings to PaymentOutcome enum.
 # The strings are spec-locked from the PDF "API Error Codes" table.

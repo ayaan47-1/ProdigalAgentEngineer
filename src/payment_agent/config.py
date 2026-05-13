@@ -100,6 +100,16 @@ DOB_DISAMB_RETRY_CAP: int = 3  # counter == 3 → terminal_cancelled
 FORCED_DISAMB_RETRY_CAP: int = 5  # counter == 5 → terminal_cancelled
 
 # ---------------------------------------------------------------------------
+# v2 orchestrator (DECISIONS_V2)
+# ---------------------------------------------------------------------------
+
+# V2-16: bound the tool-use loop per turn to prevent the LLM from looping
+# tools indefinitely. Happy-path turns use 1–3 tools; 6 leaves headroom
+# for the heaviest legitimate turn (e.g., process_payment +
+# render_canonical_message recap, possibly with a preceding correction).
+ITERATION_CAP: int = 6
+
+# ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
 

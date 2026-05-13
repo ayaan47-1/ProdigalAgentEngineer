@@ -91,6 +91,49 @@ def call_extract(
     return _extract_tool_input(response, tool_name)
 
 
+def call_messages(
+    *,
+    system_prompt: str,
+    messages: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    api_key: str | None = None,
+) -> Any:
+    """Run a tool-use Messages call for the v2 orchestrator.
+
+    Returns the raw SDK ``Message`` response so the orchestrator can read
+    ``content`` (text + tool_use blocks) and ``stop_reason`` (end_turn /
+    tool_use / max_tokens). Used by ``agent.Agent`` in its tool-use loop.
+
+    Determinism contract identical to ``call_extract``: every call uses
+    the pinned model + temperature=0 + thinking disabled per V2-32.
+
+    Raises ``LlmCallFailed`` on any SDK error OR when no API key is
+    available. The v2 orchestrator does not have the v1 fail-soft path
+    (DECISIONS #18) — LLM-driven orchestration requires an LLM, and
+    silent degradation to a deterministic path no longer makes sense
+    when the deterministic path doesn't exist.
+    """
+    resolved_key = api_key or os.environ.get(config.ANTHROPIC_API_KEY_ENV) or ""
+    if not resolved_key:
+        raise LlmCallFailed(
+            "ANTHROPIC_API_KEY is not set; v2 orchestration requires the LLM."
+        )
+
+    client = Anthropic(api_key=resolved_key)
+
+    try:
+        response = client.messages.create(
+            **cast(Any, config.LLM_CALL_KWARGS),
+            system=system_prompt,
+            messages=cast(Any, messages),
+            tools=cast(Any, tools),
+        )
+    except Exception as e:  # noqa: BLE001 — wrap any SDK error
+        raise LlmCallFailed(f"Anthropic SDK call failed: {e}") from e
+
+    return response
+
+
 def _extract_tool_input(response: Any, tool_name: str) -> dict[str, Any]:
     """Pull the named tool_use block's `input` dict from a Messages response.
 
