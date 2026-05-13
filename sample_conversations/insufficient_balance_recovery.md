@@ -2,7 +2,7 @@
 
 _tier: functionality | critical: True | result: PASS | runs: 1/1_
 
-_captured: 2026-05-13T05:38:55.693087+00:00_
+_captured: 2026-05-13T16:13:59.920731+00:00_
 
 ---
 
@@ -22,7 +22,7 @@ How much would you like to pay today?
 
 **User:** 2000
 
-**Agent:** How much would you like to pay today? Please provide your card details — card number, CVV, and expiry date (MM/YY).
+**Agent:** Please provide your card details: card number, CVV, and expiry date (MM/YY).
 
 **User:** Card 4532 0151 1283 0366, CVV 123, expires 12/27
 
@@ -38,11 +38,11 @@ How much would you like to pay today?
 
 **User:** Card 4532 0151 1283 0366, CVV 123, expires 12/27
 
-**Agent:** The card details are the same as before. To confirm the payment of ₹500.00 to card ending 0366, expiry 12/2027, please reply 'yes'.
+**Agent:** The card details haven't changed. To proceed with the ₹500.00 payment to card ending 0366, expiry 12/2027, please reply 'yes' to confirm.
 
 **User:** yes
 
-**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778650729909_fs3qe7a. Card ending: 0366. Remaining balance: ₹750.75.
+**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778688832865_6nfvng4. Card ending: 0366. Remaining balance: ₹750.75.
 
 ---
 

@@ -2,7 +2,7 @@
 
 _tier: functionality | critical: True | result: PASS | runs: 1/1_
 
-_captured: 2026-05-13T05:38:15.764969+00:00_
+_captured: 2026-05-13T16:13:11.943986+00:00_
 
 ---
 
@@ -30,7 +30,7 @@ How much would you like to pay?
 
 **User:** yes
 
-**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778650692364_fhmbyax. Card ending: 0366. Remaining balance: ₹750.75.
+**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778688788229_2klyjvs. Card ending: 0366. Remaining balance: ₹750.75.
 
 ---
 

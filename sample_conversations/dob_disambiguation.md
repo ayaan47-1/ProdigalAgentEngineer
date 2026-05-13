@@ -2,7 +2,7 @@
 
 _tier: functionality | critical: False | result: PASS | runs: 1/1_
 
-_captured: 2026-05-13T05:36:38.578069+00:00_
+_captured: 2026-05-13T16:11:34.154300+00:00_
 
 ---
 
@@ -22,7 +22,7 @@ _captured: 2026-05-13T05:36:38.578069+00:00_
 
 **Agent:** Thanks, Priya Agarwal! Your identity is verified. Your outstanding balance is ₹0.00.
 
-How much would you like to pay today?
+How much would you like to pay?
 
 ---
 

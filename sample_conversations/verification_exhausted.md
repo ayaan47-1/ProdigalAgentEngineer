@@ -2,7 +2,7 @@
 
 _tier: functionality | critical: True | result: PASS | runs: 1/1_
 
-_captured: 2026-05-13T05:42:15.391809+00:00_
+_captured: 2026-05-13T16:18:14.593003+00:00_
 
 ---
 
@@ -14,15 +14,19 @@ _captured: 2026-05-13T05:42:15.391809+00:00_
 
 **Agent:** Account found. To verify your identity, please provide your full name and one of the following: date of birth, Aadhaar last 4 digits, or pincode.
 
-**User:** I'm Nithin Jain, my DOB is 01-01-1980
+**User:** I'm Nithin Jain, my DOB is 25-03-1985
 
-**Agent:** The date of birth didn't match. You have 2 attempts remaining. Please try again with your full name and one of: date of birth, Aadhaar last 4 digits, or pincode.
+**Agent:** Verification failed — the date of birth didn't match. You have 2 attempts remaining.
 
-**User:** Try DOB 02-02-1981
+Please try again with your full name and one of: date of birth, Aadhaar last 4 digits, or pincode.
 
-**Agent:** That didn't match either. You have 1 attempt remaining. Please try again with your full name and one of: date of birth, Aadhaar last 4 digits, or pincode.
+**User:** Try DOB 18-07-1986
 
-**User:** Try DOB 03-03-1982
+**Agent:** Verification failed again — the date of birth still didn't match. You have 1 attempt remaining.
+
+Please try with your full name and one of: date of birth, Aadhaar last 4 digits, or pincode.
+
+**User:** Try DOB 30-11-1987
 
 **Agent:** I wasn't able to verify your identity. For your security, this session has ended. Please contact our support team for assistance.
 

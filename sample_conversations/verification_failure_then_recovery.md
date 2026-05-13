@@ -2,7 +2,7 @@
 
 _tier: functionality | critical: True | result: PASS | runs: 1/1_
 
-_captured: 2026-05-13T05:43:15.858279+00:00_
+_captured: 2026-05-13T16:16:27.389552+00:00_
 
 ---
 
@@ -22,7 +22,7 @@ _captured: 2026-05-13T05:43:15.858279+00:00_
 
 **Agent:** Thanks, Nithin Jain! Your identity is verified. Your outstanding balance is ₹1,250.75.
 
-How much would you like to pay?
+How much would you like to pay today?
 
 **User:** 500
 
@@ -34,7 +34,7 @@ How much would you like to pay?
 
 **User:** yes
 
-**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778650992008_p5b9gjo. Card ending: 0366. Remaining balance: ₹750.75.
+**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778688983591_s1nc7hz. Card ending: 0366. Remaining balance: ₹750.75.
 
 ---
 

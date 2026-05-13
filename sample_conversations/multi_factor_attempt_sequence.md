@@ -2,7 +2,7 @@
 
 _tier: functionality | critical: False | result: PASS | runs: 1/1_
 
-_captured: 2026-05-13T05:43:29.377599+00:00_
+_captured: 2026-05-13T16:15:42.937281+00:00_
 
 ---
 
@@ -16,11 +16,11 @@ _captured: 2026-05-13T05:43:29.377599+00:00_
 
 **User:** I'm Nithin Jain. My DOB is 01-01-1980
 
-**Agent:** The DOB didn't match. You have 2 attempts remaining. Please try again with your full name and one of: date of birth, Aadhaar last 4 digits, or pincode.
+**Agent:** The DOB didn't match. You have 2 attempts remaining. Please try again with a different secondary factor — Aadhaar last 4 digits or pincode — or double-check your date of birth.
 
 **User:** Try pincode 999999 instead
 
-**Agent:** The pincode didn't match either. You have 1 attempt remaining. Please provide your full name and one of: date of birth, Aadhaar last 4 digits, or pincode.
+**Agent:** The pincode didn't match either. You have 1 attempt remaining. Please try again with your correct DOB, Aadhaar last 4 digits, or pincode.
 
 **User:** Sorry, the correct DOB is 1990-05-14
 
@@ -30,7 +30,7 @@ How much would you like to pay today?
 
 **User:** 500
 
-**Agent:** Please provide your card details: card number, CVV, and expiry date (MM/YY).
+**Agent:** Please provide your card details — card number, CVV, and expiry date (MM/YY).
 
 **User:** Card 4532 0151 1283 0366, CVV 123, expires 12/27
 
@@ -38,7 +38,7 @@ How much would you like to pay today?
 
 **User:** yes
 
-**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778651005722_34ph18s. Card ending: 0366. Remaining balance: ₹750.75.
+**Agent:** Payment successful. Account: ACC1001. Amount paid: ₹500.00. Transaction ID: txn_1778688938009_ndryhz3. Card ending: 0366. Remaining balance: ₹750.75.
 
 ---
 
